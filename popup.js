@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-const DEFAULT="http://127.0.0.1:8000";
+const DEFAULT="https://secframework.vercel.app";
 chrome.storage.sync.get({apiBase:DEFAULT},v=>{$("api").value=v.apiBase||DEFAULT});
 function status(message,kind){const n=$("status");n.textContent=message;n.className="status "+(kind||"")}
 $("save").addEventListener("click",()=>{let base=$("api").value.trim().replace(/\/$/,"");if(!/^https?:\/\//i.test(base)){status("Enter a full address starting with https:// or http://.","bad");return}chrome.storage.sync.set({apiBase:base},()=>status("Saved. The extension will use this API address.","ok"))});
