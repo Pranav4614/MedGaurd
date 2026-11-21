@@ -1,7 +1,7 @@
 """HealthcareGuard FastAPI application.
 
 Run locally with: uvicorn server:app --reload
-Deploy on Render with: uvicorn server:app --host 0.0.0.0 --port $PORT
+Deploy on Vercel: the platform detects the FastAPI app exported as `app` from this server.py entrypoint.
 """
 from __future__ import annotations
 
