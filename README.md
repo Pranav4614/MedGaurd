@@ -114,19 +114,19 @@ The health response reports whether the existing model loaded, whether a startup
 
 ## 4. Install the Chrome extension (unpacked developer build)
 
-1. Deploy the API first and copy its base URL, e.g. `https://your-service.onrender.com` (no trailing `/api`).
+1. Download and extract the repository ZIP from <https://github.com/Pranav4614/MedGaurd>.
 2. Open Chrome and visit `chrome://extensions`.
 3. Turn on **Developer mode**.
-4. Click **Load unpacked** and select the project's `extension` folder.
+4. Click **Load unpacked** and select the extracted **repository root folder** — the folder containing `manifest.json`, `background.js`, `content.js` and `popup.html`. These files are not inside an `extension/` subfolder in this repository.
 5. Pin HealthcareGuard from Chrome's Extensions menu.
-6. Open the extension popup, paste the Render base URL, click **Save address**, and then **Test connection**.
+6. Open the extension popup. Its default API address is `https://secframework.vercel.app`. Click **Test connection**; it should report that the API is connected and the model is ready.
 7. Open ChatGPT, Gemini or Claude. Type a healthcare-related prompt and pause for about 1–2 seconds. A warning card appears if the API reports a configured risk signal.
 
-For local testing, set the popup's API address to `http://127.0.0.1:8000` and keep the local server running.
+For local testing, change the popup API address to `http://127.0.0.1:8000` and keep the local server running.
 
 ### If you use a different hosting domain
 
-The extension has host permissions for `*.onrender.com`, localhost and 127.0.0.1. If you deploy the API on another domain, add that API host pattern (for example `https://api.example.com/*`) to `host_permissions` in `extension/manifest.json`, save the file, and click **Reload** for the extension on `chrome://extensions`.
+The manifest has a host permission for `https://secframework.vercel.app/*`, plus localhost for local testing. If you deploy the API on another domain, add that exact host pattern to `host_permissions` in the root `manifest.json`, save the file, and click **Reload** for the extension on `chrome://extensions`.
 
 ### Extension behavior and privacy
 
