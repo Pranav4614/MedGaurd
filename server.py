@@ -18,7 +18,7 @@ from healthcareguard.guard import Guard
 from healthcareguard.policy import ActionContext, ROLES, SOURCES
 from healthcareguard.patient_risk import detect_patient_risk
 
-APP_VERSION = "2.0.0-prototype"
+APP_VERSION = "2.1.0-prototype"
 app = FastAPI(
     title="HealthcareGuard API",
     description="Research prototype for screening healthcare prompts for safeguard-bypass and patient-risk signals.",
@@ -27,7 +27,7 @@ app = FastAPI(
     redoc_url=None,
 )
 
-allowed_origins = [x.strip() for x in os.getenv("ALLOWED_ORIGINS", "https://healthcaregaurd.netlify.app").split(",") if x.strip()]
+allowed_origins = [x.strip() for x in os.getenv("ALLOWED_ORIGINS", "https://secframework.vercel.app").split(",") if x.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
@@ -39,8 +39,14 @@ app.add_middleware(
     max_age=600,
 )
 
-# Load the existing trained safeguard-bypass model once at process startup.
-guard = Guard.load_or_train()
+# Load the existing trained model once per warm instance. Never train at cold start.
+# If the artifact is missing or incompatible, report degraded status and refuse screening.
+guard = None
+guard_load_error = None
+try:
+    guard = Guard.load()
+except Exception as exc:
+    guard_load_error = type(exc).__name__
 
 
 class ScreenRequest(BaseModel):
@@ -55,10 +61,16 @@ class ScreenRequest(BaseModel):
 def health():
     return {
         "ok": True,
+        "status": "ready" if guard is not None else "degraded",
         "service": "HealthcareGuard",
         "version": APP_VERSION,
         "model_loaded": guard is not None,
-        "safeguard_bypass_threshold": guard.threshold,
+        "safeguard_bypass_threshold": guard.threshold if guard is not None else None,
+        "detectors": {
+            "clinical_safeguard_model": "ready" if guard is not None else "unavailable",
+            "patient_risk_rules": "ready",
+        },
+        "model_load_error": guard_load_error,
         "patient_risk_screening": "transparent_rules_v1",
         "note": "Research prototype; not clinically validated.",
     }
@@ -66,6 +78,8 @@ def health():
 
 @app.post("/api/screen")
 def screen(req: ScreenRequest):
+    if guard is None:
+        raise HTTPException(status_code=503, detail="The clinical safeguard model is unavailable. This prompt was not screened.")
     text = req.text.strip()
     if not text:
         raise HTTPException(status_code=422, detail="Enter text to screen.")
@@ -125,9 +139,15 @@ def screen(req: ScreenRequest):
 
 @app.get("/")
 def index():
-    return FileResponse(Path(__file__).parent / "static" / "index.html")
+    dashboard = Path(__file__).parent / "index.html"
+    if dashboard.is_file():
+        return FileResponse(dashboard)
+    return {"service": "HealthcareGuard API", "docs": "/api/docs", "health": "/api/health"}
 
 
 @app.get("/extension")
 def extension_info():
-    return FileResponse(Path(__file__).parent / "extension" / "install.html")
+    guide = Path(__file__).parent / "install.html"
+    if guide.is_file():
+        return FileResponse(guide)
+    return {"message": "Extension install guide is not included in this deployment."}
