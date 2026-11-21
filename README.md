@@ -12,29 +12,32 @@ The package also includes a redesigned responsive dashboard and a Manifest V3 Ch
 ## Project structure
 
 ```text
-healthcareguard_project/
-├── server.py                     # FastAPI app; preserves /api/screen contract and adds risk layer
-├── requirements-web.txt          # Runtime dependencies
-├── requirements-dev.txt          # Test dependencies
-├── render.yaml                   # Render deployment blueprint
-├── Dockerfile                    # Optional container build
-├── models/guard.joblib           # Existing prebuilt safeguard-bypass model
-├── healthcareguard/
-│   ├── guard.py                  # Existing ML safeguard-bypass detector
-│   ├── policy.py                 # Existing context/policy layer
-│   ├── patient_risk.py           # New patient-facing pattern detector
-│   └── ...                       # Existing taxonomy, lexicon, model and evaluation code
-├── static/index.html             # Redesigned dashboard
-├── extension/                    # Chrome Manifest V3 extension
-│   ├── manifest.json
-│   ├── background.js
-│   ├── content.js
-│   ├── content.css
-│   ├── popup.html
-│   ├── popup.js
-│   └── icons/
-├── tests/                         # Automated screening and API tests
-└── .github/workflows/tests.yml   # CI test workflow
+MedGaurd/
+├── server.py                     # FastAPI app and API routes
+├── requirements.txt              # Vercel runtime dependencies
+├── requirements-web.txt          # Local/container runtime dependencies
+├── .python-version               # Python 3.13
+├── vercel.json                   # Includes model and dashboard assets
+├── guard.joblib                  # Existing trained safeguard-bypass model
+├── healthcareguard/              # Importable Python package
+│   ├── guard.py
+│   ├── policy.py
+│   ├── patient_risk.py
+│   ├── lexicon.py
+│   ├── taxonomy.py
+│   ├── models.py
+│   ├── features.py
+│   ├── challenge.py
+│   └── data_gen.py
+├── index.html                    # Dashboard
+├── install.html                  # Extension setup guide
+├── manifest.json                # Chrome Manifest V3 (repository root)
+├── background.js
+├── content.js
+├── content.css
+├── popup.html
+├── popup.js
+└── icon16.png, icon32.png, icon48.png, icon128.png
 ```
 
 ## 1. Run locally on Windows
@@ -81,32 +84,33 @@ python -m pytest -q
 
 The test suite covers the rule detector and API response structure. Passing these tests does **not** establish clinical validity, sensitivity, specificity, or safety performance.
 
-## 3. Deploy the website and API on Render (free prototype)
+## 3. Deploy the website and API on Vercel
 
-The FastAPI app serves both the redesigned dashboard and its API from the same service.
+The GitHub repository is connected to the Vercel project **secframework**:
 
-1. Create a GitHub repository and upload the **extracted contents** of this project folder. Do not upload only the ZIP file.
-2. Sign in to <https://render.com/> and connect your GitHub account.
-3. Choose **New → Blueprint** and select the repository (the root contains `render.yaml`). If using **New → Web Service** instead, use the settings below.
-4. Confirm the service is on the **Free** plan. Do not add a paid plan for this prototype.
-5. Wait for the first deployment to complete.
-6. Open the Render URL, then check `/api/health` and `/api/docs`.
+- GitHub repository: `Pranav4614/MedGaurd`
+- Production branch: `main`
+- Framework preset: **FastAPI**
+- Root directory: repository root
+- Python runtime: **3.13** (from `.python-version`)
+- Dependencies: `requirements.txt`
+- Public dashboard and API base URL: <https://secframework.vercel.app>
 
-Manual Web Service settings:
+Vercel detects the FastAPI application exported as `app` from the root `server.py` entrypoint. The same application serves the dashboard and API. No separate Render service, Docker container, database, paid AI API or API key is required for this prototype.
 
-- Runtime: Python
-- Build command: `pip install -r requirements-web.txt`
-- Start command: `uvicorn server:app --host 0.0.0.0 --port $PORT`
-- Health check path: `/api/health`
-- Python version environment variable: `PYTHON_VERSION=3.13.5`
+Health check:
 
-The included `render.yaml` supplies these settings.
+- <https://secframework.vercel.app/api/health>
 
-### Important free-tier behavior
+The health response reports whether the existing model loaded, whether a startup inference check passed, and whether the patient-risk rules are available.
 
-Render's free web services currently spin down after 15 minutes without inbound traffic; the next request can take about a minute to wake the service. Free instances may restart, have an ephemeral filesystem and are documented by Render as unsuitable for production. This means the service has a public URL, but it is **not guaranteed to be continuously responsive or available 24/7**. See <https://render.com/docs/free> and <https://render.com/docs/faq>.
+### Important deployment and privacy notes
 
-Do not try to bypass free-tier idle limits with artificial keep-alive traffic. The extension displays a connection message if the API is asleep or unavailable.
+- The Vercel project is on the Hobby plan. Vercel documents Hobby as intended for personal, non-commercial use; review the current plan terms before using this as a commercial SaaS.
+- The API is publicly reachable so the dashboard and browser extension can call it. It does not authenticate individual users or provide rate limiting in this prototype.
+- Do not submit names, dates of birth, medical record numbers, or any other identifiable patient information.
+- The API does not intentionally persist prompt text, but hosting infrastructure can retain operational logs. Do not treat this prototype as suitable for confidential or production healthcare workloads.
+- A successful health check does not establish clinical validity, sensitivity, specificity or safety.
 
 ## 4. Install the Chrome extension (unpacked developer build)
 
