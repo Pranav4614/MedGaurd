@@ -1,4 +1,4 @@
-const DEFAULT_API = "http://127.0.0.1:8000";
+const DEFAULT_API = "https://secframework.vercel.app";
 
 async function getApiBase() {
   const saved = await chrome.storage.sync.get({ apiBase: DEFAULT_API });
