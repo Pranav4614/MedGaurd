@@ -43,10 +43,17 @@ app.add_middleware(
 # If the artifact is missing or incompatible, report degraded status and refuse screening.
 guard = None
 guard_load_error = None
+model_inference_error = None
 try:
     guard = Guard.load()
+    # Exercise the real classifier once during cold start using a synthetic,
+    # non-patient education prompt. This catches cases where the artifact loads
+    # but cannot perform inference in the deployed Python environment.
+    guard.screen("What is diabetes?", ActionContext())
 except Exception as exc:
+    guard = None
     guard_load_error = type(exc).__name__
+    model_inference_error = type(exc).__name__
 
 
 class ScreenRequest(BaseModel):
@@ -71,6 +78,7 @@ def health():
             "patient_risk_rules": "ready",
         },
         "model_load_error": guard_load_error,
+        "model_inference": "ready" if guard is not None and model_inference_error is None else "unavailable",
         "patient_risk_screening": "transparent_rules_v1",
         "note": "Research prototype; not clinically validated.",
     }
