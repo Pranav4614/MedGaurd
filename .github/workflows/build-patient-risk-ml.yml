@@ -55,12 +55,11 @@ jobs:
           assert report['dataset_rows'] == 2432
           print('Dataset and model artifact verified:', len(data), 'rows,', data.category.nunique(), 'categories')
           PY
-      - name: Commit generated model, dataset and evaluation
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add healthcareguard_patient_ml_v2/patient_risk_substance_dataset.csv healthcareguard/patient_risk_substance_model.joblib healthcareguard/patient_risk_evaluation.json
-          if ! git diff --cached --quiet; then
-            git commit -m 'Build patient-risk ML artifact from synthetic dataset'
-            git push
-          fi
+      - name: Upload model and evaluation build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: patient-risk-ml-build
+          path: |
+            healthcareguard/patient_risk_substance_model.joblib
+            healthcareguard/patient_risk_evaluation.json
+            healthcareguard_patient_ml_v2/patient_risk_substance_dataset.csv
