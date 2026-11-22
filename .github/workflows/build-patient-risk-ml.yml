@@ -39,7 +39,7 @@ jobs:
             --model healthcareguard/patient_risk_substance_model.joblib \
             --report healthcareguard/patient_risk_evaluation.json
       - name: Run API and detector regression tests
-        run: pytest -q
+        run: python -m pytest -q
       - name: Verify generated artifact
         run: |
           python - <<'PY'
