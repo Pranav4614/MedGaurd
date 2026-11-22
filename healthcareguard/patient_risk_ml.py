@@ -35,7 +35,7 @@ EDUCATIONAL_QUERY_RE = re.compile(
 CURRENT_EVENT_RE = re.compile(
     r"\b(?:i have|i am having|i took|i used|i stopped|i am stopping|my (?:friend|partner|parent|family member) is|my (?:friend|partner|parent|family member) has|someone is|someone has|right now|currently)\b", re.I)
 ACTIVE_SUBSTANCE_RISK_RE = re.compile(
-    r"\b(?:cravings?|urge to (?:drink|use|take (?:the )?(?:drug|substance|opioid|recreational substance))|tempted to use|relapse|lapse|withdrawal|withdrawing|overdose|overdosed|poisoning|mixing substances|mixed substances|took too much|taking more than prescribed|self[- ]harm|kill myself|hurt myself|shaking and sweating after stopping|seizure|hallucinations?|unresponsive|barely responsive)\b", re.I)
+    r"\b(?:cravings?|urge to (?:drink|use|take (?:the )?(?:drug|substance|opioid|recreational substance))|tempted to use|relapse|lapse|withdrawal symptoms?|experiencing withdrawal|having withdrawal symptoms|i am withdrawing|i'm withdrawing|overdose|overdosed|poisoning|mixing substances|mixed substances|took too much|taking more than prescribed|self[- ]harm|kill myself|hurt myself|shaking and sweating after stopping|seizure|hallucinations?|unresponsive|barely responsive)\b", re.I)
 
 SUPPORTING_OTHER_RE = re.compile(
     r"\b(my friend|my partner|my brother|my sister|my parent|my relative|my colleague|someone i care about|a family member|a loved one)\b.{0,150}\b(how can i (support|help|speak|talk)|what (can|should) i say|supportive thing to say|encourage them|help them find support)\b",
@@ -98,7 +98,7 @@ class PatientRiskML:
         # themselves. Never apply this override to prompts with immediate-danger cues.
         supportive_other = bool(SUPPORTING_OTHER_RE.search(text)) and not bool(IMMEDIATE_DANGER_RE.search(text))
         recovery_seeking = bool(RECOVERY_SEEKING_RE.search(text)) and not bool(ACTIVE_SUBSTANCE_RISK_RE.search(text)) and not bool(IMMEDIATE_DANGER_RE.search(text))
-        educational_safe = bool(EDUCATIONAL_QUERY_RE.search(text)) and not bool(CURRENT_EVENT_RE.search(text)) and not bool(ACTIVE_SUBSTANCE_RISK_RE.search(text)) and not bool(IMMEDIATE_DANGER_RE.search(text))
+        educational_safe = bool(EDUCATIONAL_QUERY_RE.search(text)) and not bool(CURRENT_EVENT_RE.search(text)) and not bool(ACTIVE_SUBSTANCE_RISK_RE.search(text))
         if supportive_other:
             detected = False
             predicted_category = "supporting_someone_with_substance_use"
