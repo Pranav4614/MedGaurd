@@ -1,8 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "server.py": {
-      "includeFiles": "{guard.joblib,index.html,install.html}"
-    }
-  }
+  "functions": {"server.py": {"includeFiles": "{guard.joblib,index.html,install.html,healthcareguard/patient_risk_substance_model.joblib}"}}
 }

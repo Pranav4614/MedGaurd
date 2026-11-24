@@ -175,3 +175,37 @@ Text is limited to 4,000 characters. The app does not intentionally persist subm
 ## License
 
 No license is included. Add an appropriate license only after reviewing ownership and usage rights for all included source code and model artifacts.
+
+
+## Substance-use and health-misinformation screening (v2.2 prototype)
+
+The API combines the existing clinical safeguard-bypass classifier with three
+patient-facing components: the existing patient-risk rules, transparent rules
+for substance-use and misinformation-related wording, and an experimental
+two-stage ML classifier (binary review signal plus a 19-category suggestion).
+
+The deterministic rules retain authority for possible urgent overdose,
+poisoning, severe withdrawal, and self-harm cues. The ML layer can add a review
+signal, but it cannot independently set an urgent alert or downgrade deterministic
+emergency findings. Recovery-seeking, harm-reduction, family-support, and general
+claim-verification prompts are not classified as dangerous solely because they
+mention substance use.
+
+The ML model is trained offline from a synthetic dataset. The Vercel function
+loads the committed `healthcareguard/patient_risk_substance_model.joblib`
+artifact and does not train at cold start. The API health endpoint reports
+whether that optional model loaded. If the optional artifact is unavailable,
+the existing safeguard classifier and deterministic rules continue to run.
+
+**Limitations:** all ML training examples are synthetic. Holdout metrics are not
+clinical performance measures and model scores are not calibrated probabilities.
+The system does not diagnose addiction, determine a person's clinical state,
+provide emergency triage, or guarantee safety. Independent human-authored and
+clinically reviewed validation is required before real patient use. Do not submit
+identifiable patient information.
+
+### Preview integration
+
+The implementation is being reviewed in a feature branch and preview before
+any production promotion. The browser extension should be manually retested
+after changes to ChatGPT, Gemini, or Claude page structures.
