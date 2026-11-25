@@ -4,7 +4,7 @@
   window.__healthcareGuardInstalled = true;
 
   // Local-only prefilter: unrelated text is not sent to the backend.
-  const HEALTHCARE_TERMS = /\b(medical|medicine|medication|prescription|dose|dosage|pill|tablet|drug|interaction|allergy|allergic|symptom|pain|chest|breath|breathing|shortness of breath|overdose|poison|insulin|warfarin|antibiotic|pregnan|blood pressure|diabetes|cancer|stroke|seizure|fever|doctor|pharmacist|nurse|patient|treatment|diagnos|side effect|kidney|liver|heart attack)\w*\b/i;
+  const HEALTHCARE_TERMS = /\b(medical|medicine|medication|prescription|dose|dosage|pill|tablet|drug|interaction|allergy|allergic|symptom|pain|chest|breath|breathing|shortness of breath|overdose|poison|insulin|warfarin|antibiotic|pregnan|blood pressure|diabetes|cancer|stroke|seizure|fever|doctor|pharmacist|nurse|patient|treatment|diagnos|side effect|kidney|liver|heart attack|addiction|addictive|alcohol|drinking|substance|craving|relapse|withdrawal|recovery|rehab|opioid|fentanyl|sedative|benzodiazepine|drug use|misinformation|viral post|health claim|harm reduction)\w*\b/i;
   const DEBOUNCE_MS = 1400;
   let timer = null;
   let lastSubmittedText = "";
@@ -65,6 +65,16 @@
       tag.textContent = f.label;
       tags.append(tag);
     });
+    (result.substance_risk?.findings || []).slice(0, 3).forEach(f => {
+      const tag = document.createElement("span");
+      tag.textContent = f.label;
+      tags.append(tag);
+    });
+    if (result.patient_risk_ml?.detected && result.patient_risk_ml?.label) {
+      const tag = document.createElement("span");
+      tag.textContent = result.patient_risk_ml.label + " (experimental)";
+      tags.append(tag);
+    }
     if (result.flagged) {
       const tag = document.createElement("span");
       tag.textContent = "Clinical safeguard bypass signal";
